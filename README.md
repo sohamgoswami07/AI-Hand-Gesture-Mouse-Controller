@@ -20,7 +20,14 @@ Control your computer's mouse with your **hand gestures via webcam**! This proje
 
 ```
 
-<pre> 📁 <b>Project Root</b> ├── 📁 <b>mouse_controller</b> │ ├── 🧠 <b>AiVirtualMouseProject.py</b> # Main application logic │ ├── ✋ <b>HandTrackingModule.py</b> # Detects hands and gestures via MediaPipe │ └── 🖱️ <b>MouseController.py</b> # Wrapper for PyAutoGUI mouse actions ├── 📄 <b>requirements.txt</b> # List of Python packages ├── 📄 <b>.gitignore</b> # Ignore virtualenv, pycache, etc. └── 📄 <b>README.md</b> # This file! </pre>
+.
+├── mouse_controller
+│   ├── AiVirtualMouseProject.py      # Main application logic
+│   ├── HandTrackingModule.py         # Detects hands and gestures via MediaPipe
+│   └── MouseController.py            # Wrapper for PyAutoGUI mouse actions
+├── requirements.txt                  # List of Python packages
+├── .gitignore                        # Ignore virtualenv, pycache, etc.
+└── README.md                         # This file!
 
 ````
 
