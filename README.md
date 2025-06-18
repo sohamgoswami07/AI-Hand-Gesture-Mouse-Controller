@@ -21,9 +21,10 @@ Control your computer's mouse with your **hand gestures via webcam**! This proje
 ```
 
 .
-├── AiVirtualMouseProject.py      # Main application logic
-├── HandTrackingModule.py         # Detects hands and gestures via MediaPipe
-├── MouseController.py            # Wrapper for PyAutoGUI mouse actions
+├── mouse_controller
+  ├── AiVirtualMouseProject.py      # Main application logic
+  ├── HandTrackingModule.py         # Detects hands and gestures via MediaPipe
+  ├── MouseController.py            # Wrapper for PyAutoGUI mouse actions
 ├── requirements.txt              # List of Python packages
 ├── .gitignore                    # Ignore virtualenv, pycache, etc.
 └── README.md                     # This file!
@@ -37,7 +38,7 @@ Control your computer's mouse with your **hand gestures via webcam**! This proje
 ### 1. Clone the Repository
 ```bash
 git clone https://github.com/sohamgoswami07/AI-Hand-Gesture-Mouse-Controller.git
-cd mouse_controller\
+cd AI-Hand-Gesture-Mouse-Controller
 ````
 
 ### 2. (Optional) Create a Virtual Environment
@@ -60,6 +61,7 @@ pip install -r requirements.txt
 ### 4. Run the Application
 
 ```bash
+cd mouse_controller\
 python AiVirtualMouseProject.py
 ```
 
@@ -114,11 +116,11 @@ This project is open-source under the **MIT License**.
 
 ## 🙌 Author
 
-Developed by - [Soham Goswami](https://www.linkedin.com/in/soham-python-developer/)
+Developed by - [Soham Goswami](https://www.linkedin.com/in/soham-python-developer/)  
 Inspired by gesture-based interfaces and the power of AI in human-computer interaction.
 
 ---
 
 ## ✅ Changes You Should Make
 
-* [LinkedIn](https://www.linkedin.com/in/soham-python-developer/): Feel free to connect for project feedback or collaborations
+* Feel free to connect through [LinkedIn](https://www.linkedin.com/in/soham-python-developer/) for project feedback or collaborations
