@@ -23,6 +23,10 @@ ZOOM_THRESHOLD_CHANGE = 15
 ZOOM_MIN_DISTANCE = 30
 ZOOM_MAX_DISTANCE = 300
 
+SWIPE_MIN_FINGERS = 4
+SWIPE_DEBOUNCE_TIME = 1.0
+SWIPE_THRESHOLD = 100
+
 # === Camera Setup ===
 cap = cv2.VideoCapture(0)
 cap.set(3, 320)
@@ -51,6 +55,10 @@ last_scroll_time = 0
 zoom_active = False
 last_zoom_distance = 0
 
+last_swipe_time = 0
+swipe_start_pos = None
+swipe_direction_triggered = False
+
 # === Hand Detector ===
 detector = htm.handDetector(detectionCon=0.7, trackCon=0.7)
 
@@ -78,14 +86,8 @@ while True:
         index_thumb_dist = math.hypot(x_index - x_thumb, y_index - y_thumb)
         index_middle_dist = math.hypot(x_index - x_middle, y_index - y_middle)
 
-        # === Zoom In/Out Detection (Thumb + Index + Middle)
+        # === Zoom In/Out Detection
         if thumb_up and index_up and middle_up:
-            # Get coordinates
-            x_thumb, y_thumb = lmList[4][1], lmList[4][2]
-            x_index, y_index = lmList[8][1], lmList[8][2]
-            x_middle, y_middle = lmList[12][1], lmList[12][2]
-
-            # Compute average distance between all 3 finger tips
             dist_thumb_index = math.hypot(x_thumb - x_index, y_thumb - y_index)
             dist_thumb_middle = math.hypot(x_thumb - x_middle, y_thumb - y_middle)
             dist_index_middle = math.hypot(x_index - x_middle, y_index - y_middle)
@@ -108,7 +110,7 @@ while True:
         else:
             zoom_active = False
 
-        # === Smart Scroll + Right Click ===
+        # === Smart Scroll + Right Click
         if index_up and middle_up and index_middle_dist < click_threshold:
             if not fingers_touching:
                 fingers_touching = True
@@ -129,7 +131,6 @@ while True:
                     if current_time - last_scroll_time > SCROLL_UPDATE_INTERVAL:
                         if abs(scroll_speed_y) > SCROLL_DEADZONE:
                             pyautogui.scroll(scroll_speed_y * SCROLL_SCALE)
-
                         if abs(scroll_speed_x) > SCROLL_DEADZONE:
                             pyautogui.hscroll(scroll_speed_x * SCROLL_SCALE)
 
@@ -153,7 +154,7 @@ while True:
             mc.move_cursor(screenW, screenH, clocX, clocY)
             plocX, plocY = clocX, clocY
 
-        # === Pinch Start Detection (Thumb + Index only)
+        # === Pinch Detection
         if index_up and thumb_up and not middle_up:
             if index_thumb_dist < click_threshold:
                 if not pinch_active:
@@ -200,6 +201,44 @@ while True:
                 mc.mouse_press()
                 dragging = True
 
+        # === Improved Four/Five-Finger Swipe Detection ===
+        if fingers.count(1) >= SWIPE_MIN_FINGERS:
+            tip_ids = [8, 12, 16, 20]
+            x_vals = [lmList[id][1] for id in tip_ids]
+            y_vals = [lmList[id][2] for id in tip_ids]
+            avg_x = sum(x_vals) / len(x_vals)
+            avg_y = sum(y_vals) / len(y_vals)
+
+            if not swipe_start_pos:
+                swipe_start_pos = (avg_x, avg_y)
+                swipe_direction_triggered = False
+            else:
+                dx = avg_x - swipe_start_pos[0]
+                dy = avg_y - swipe_start_pos[1]
+
+                if not swipe_direction_triggered and current_time - last_swipe_time > SWIPE_DEBOUNCE_TIME:
+                    if abs(dy) > SWIPE_THRESHOLD and abs(dy) > abs(dx):
+                        if dy < 0:
+                            print("Swipe Up: Task View")
+                            pyautogui.hotkey('win', 'tab')
+                        else:
+                            print("Swipe Down: Show Desktop")
+                            pyautogui.hotkey('win', 'd')
+                        swipe_direction_triggered = True
+                        last_swipe_time = current_time
+                    elif abs(dx) > SWIPE_THRESHOLD and abs(dx) > abs(dy):
+                        if dx < 0:
+                            print("Swipe Left: Previous App")
+                            pyautogui.hotkey('alt', 'shift', 'tab')
+                        else:
+                            print("Swipe Right: Next App")
+                            pyautogui.hotkey('alt', 'tab')
+                        swipe_direction_triggered = True
+                        last_swipe_time = current_time
+        else:
+            swipe_start_pos = None
+            swipe_direction_triggered = False
+
         # === Draw Fingertip Circles
         for i, isUp in enumerate(fingers):
             if isUp:
@@ -218,6 +257,8 @@ while True:
             cv2.putText(img, "Clicking...", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
         elif zoom_active:
             cv2.putText(img, "Zooming...", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 255), 2)
+        elif fingers.count(1) >= SWIPE_MIN_FINGERS and swipe_start_pos:
+            cv2.putText(img, "Swipe Detected", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 128, 255), 2)
 
     # === Display Window
     cv2.imshow("AI Virtual Mouse", img)
