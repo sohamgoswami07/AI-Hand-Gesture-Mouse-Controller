@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # ✋ AI Virtual Mouse Controller using Hand Gestures
 
 Control your computer's mouse with your **hand gestures via webcam**! This project uses **MediaPipe** and **OpenCV** to detect hand landmarks and translates them into mouse operations like moving the cursor, clicking, dragging, right-clicking, and even scrolling—completely touch-free!
