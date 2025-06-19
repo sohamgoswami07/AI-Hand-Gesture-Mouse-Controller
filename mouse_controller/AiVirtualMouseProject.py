@@ -19,6 +19,13 @@ SCROLL_SCALE = 3
 SCROLL_UPDATE_INTERVAL = 0.01
 SCROLL_DEADZONE = 2
 
+<<<<<<< HEAD
+=======
+ZOOM_THRESHOLD_CHANGE = 15
+ZOOM_MIN_DISTANCE = 30
+ZOOM_MAX_DISTANCE = 300
+
+>>>>>>> master
 # === Camera Setup ===
 cap = cv2.VideoCapture(0)
 cap.set(3, 320)
@@ -44,6 +51,12 @@ scroll_anchor_y = 0
 scroll_anchor_x = 0
 last_scroll_time = 0
 
+<<<<<<< HEAD
+=======
+zoom_active = False
+last_zoom_distance = 0
+
+>>>>>>> master
 # === Hand Detector ===
 detector = htm.handDetector(detectionCon=0.7, trackCon=0.7)
 
@@ -71,6 +84,39 @@ while True:
         index_thumb_dist = math.hypot(x_index - x_thumb, y_index - y_thumb)
         index_middle_dist = math.hypot(x_index - x_middle, y_index - y_middle)
 
+<<<<<<< HEAD
+=======
+        # === Zoom In/Out Detection (Thumb + Index + Middle)
+        if thumb_up and index_up and middle_up:
+            # Get coordinates
+            x_thumb, y_thumb = lmList[4][1], lmList[4][2]
+            x_index, y_index = lmList[8][1], lmList[8][2]
+            x_middle, y_middle = lmList[12][1], lmList[12][2]
+
+            # Compute average distance between all 3 finger tips
+            dist_thumb_index = math.hypot(x_thumb - x_index, y_thumb - y_index)
+            dist_thumb_middle = math.hypot(x_thumb - x_middle, y_thumb - y_middle)
+            dist_index_middle = math.hypot(x_index - x_middle, y_index - y_middle)
+
+            current_zoom_distance = (dist_thumb_index + dist_thumb_middle + dist_index_middle) / 3
+
+            if not zoom_active:
+                last_zoom_distance = current_zoom_distance
+                zoom_active = True
+            else:
+                distance_change = current_zoom_distance - last_zoom_distance
+                if abs(distance_change) > ZOOM_THRESHOLD_CHANGE:
+                    if distance_change > 0:
+                        print("Zooming In")
+                        pyautogui.hotkey('ctrl', '+')
+                    else:
+                        print("Zooming Out")
+                        pyautogui.hotkey('ctrl', '-')
+                    last_zoom_distance = current_zoom_distance
+        else:
+            zoom_active = False
+
+>>>>>>> master
         # === Smart Scroll + Right Click ===
         if index_up and middle_up and index_middle_dist < click_threshold:
             if not fingers_touching:
@@ -107,7 +153,11 @@ while True:
             fingers_touching = False
             scrolling = False
 
+<<<<<<< HEAD
         # === Cursor Movement (only when not touching fingers)
+=======
+        # === Cursor Movement
+>>>>>>> master
         if ((fingers.count(1) == 1 and index_up) or dragging) and not fingers_touching:
             x3 = np.interp(x_index, (0, wCam), (0, screenW))
             y3 = np.interp(y_index, (0, hCam), (0, screenH))
@@ -116,7 +166,11 @@ while True:
             mc.move_cursor(screenW, screenH, clocX, clocY)
             plocX, plocY = clocX, clocY
 
+<<<<<<< HEAD
         # === Pinch Start Detection (Thumb + Index)
+=======
+        # === Pinch Start Detection (Thumb + Index only)
+>>>>>>> master
         if index_up and thumb_up and not middle_up:
             if index_thumb_dist < click_threshold:
                 if not pinch_active:
@@ -179,6 +233,11 @@ while True:
             cv2.putText(img, "Dragging...", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2)
         elif pinch_active:
             cv2.putText(img, "Clicking...", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+<<<<<<< HEAD
+=======
+        elif zoom_active:
+            cv2.putText(img, "Zooming...", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 255), 2)
+>>>>>>> master
 
     # === Display Window
     cv2.imshow("AI Virtual Mouse", img)
