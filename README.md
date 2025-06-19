@@ -124,6 +124,3 @@ Inspired by gesture-based interfaces and the power of AI in human-computer inter
 ## ✅ Changes You Should Make
 
 * Feel free to connect through [LinkedIn](https://www.linkedin.com/in/soham-python-developer/) for project feedback or collaborations
-=======
-# sohamgoswami07-Hand-Gesture-Mouse-Controller
->>>>>>> master
