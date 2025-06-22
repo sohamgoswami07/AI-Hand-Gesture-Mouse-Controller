@@ -1,8 +1,3 @@
-Here is the **updated `README.md`** reflecting all the **latest enhancements and gesture features** from the analyzed code:
-
----
-
-```markdown
 # ✋ AI Virtual Mouse Controller using Hand Gestures
 
 Control your computer's mouse using **AI-based hand gesture recognition via webcam**!  
