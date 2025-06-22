@@ -1,8 +1,3 @@
-Here is the **updated `README.md`** reflecting all the **latest enhancements and gesture features** from the analyzed code:
-
----
-
-```markdown
 # ✋ AI Virtual Mouse Controller using Hand Gestures
 
 Control your computer's mouse using **AI-based hand gesture recognition via webcam**!  
@@ -33,11 +28,13 @@ This touchless system combines **MediaPipe**, **OpenCV**, and **PyAutoGUI** to o
 ```
 
 .
-├── AiVirtualMouseProject.py       # Main AI virtual mouse application
-├── HandTrackingModule.py          # MediaPipe-based hand and finger detector
-├── MouseController.py             # PyAutoGUI-based cursor and mouse event manager
-├── requirements.txt               # Required Python libraries
-└── README.md                      # You’re reading it!
+├── mouse_controller
+│   ├── AiVirtualMouseProject.py      # Main application logic
+│   ├── HandTrackingModule.py         # Detects hands and gestures via MediaPipe
+│   └── MouseController.py            # Wrapper for PyAutoGUI mouse actions
+├── requirements.txt                  # List of Python packages
+├── .gitignore                        # Ignore virtualenv, pycache, etc.
+└── README.md                         # This file!
 
 ````
 
@@ -71,6 +68,7 @@ pip install -r requirements.txt
 ### 4. Run the Application
 
 ```bash
+cd mouse_controller\
 python AiVirtualMouseProject.py
 ```
 
@@ -78,7 +76,7 @@ python AiVirtualMouseProject.py
 
 ## 🎮 Gesture Controls
 
-| ✋ Gesture                         | 🖱️ Action             |
+| ✋ Gesture                        | 🖱️ Action             |
 | --------------------------------- | ---------------------- |
 | Index finger up                   | Move mouse cursor      |
 | Thumb + Index pinch               | Left click             |
@@ -139,9 +137,3 @@ Inspired by natural human-computer interaction through computer vision.
 Want to contribute or suggest a feature?
 Reach out on [LinkedIn](https://www.linkedin.com/in/soham-python-developer/), or raise an issue in the repo.
 
-```
-
----
-
-Let me know if you'd like this saved back into your project folder as an updated `README.md`.
-```
