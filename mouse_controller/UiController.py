@@ -6,11 +6,28 @@ def start_ui():
     root.title("Virtual Mouse Settings")
     root.geometry("400x300")
 
+    feedback_var = tk.BooleanVar(value=config.visual_feedback_enabled)
+
+    def toggle_feedback():
+        config.visual_feedback_enabled = feedback_var.get()
+
+    def stop_program():
+        config.shutdown_requested = True
+        root.quit()       # Exit the Tkinter UI
+        root.destroy()    # Close the window completely
+
+    # Visual Feedback Toggle
     tk.Checkbutton(
-        root, text="Enable Cursor Movement",
-        variable=tk.BooleanVar(value=config.cursor_enabled),
-        command=lambda: setattr(config, "cursor_enabled", not config.cursor_enabled)
+        root, text="Enable Camera Visual Feedback",
+        variable=feedback_var,
+        command=toggle_feedback
     ).pack(pady=10)
+
+    # Stop Program Button
+    tk.Button(
+        root, text="Stop Program", fg="white", bg="red",
+        command=stop_program
+    ).pack(pady=20)
 
     def slider(label, attr, frm, to, res):
         tk.Label(root, text=label).pack()
