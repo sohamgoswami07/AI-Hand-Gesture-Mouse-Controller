@@ -62,6 +62,8 @@ SWIPE_THRESHOLD = 40
 # === Hand Detector ===
 detector = htm.handDetector(detectionCon=0.7, trackCon=0.7)
 
+window_open = False  # Track if window was opened
+
 while True:
     success, img = cap.read()
     if not success:
@@ -254,10 +256,19 @@ while True:
         elif fingers.count(1) >= SWIPE_MIN_FINGERS and swipe_start_pos:
             cv2.putText(img, "Swipe Detected", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 128, 255), 2)
 
-    # === Display Window
-    cv2.imshow("AI Virtual Mouse", img)
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        print("Exiting...")
+    # === Display Window Based on Visual Feedback Setting
+    if config.visual_feedback_enabled:
+        if not window_open:
+            window_open = True
+        cv2.imshow("AI Virtual Mouse", img)
+    else:
+        if window_open:
+            cv2.destroyWindow("AI Virtual Mouse")
+            window_open = False
+
+    # === Shutdown Handling
+    if config.shutdown_requested or (cv2.waitKey(1) & 0xFF == ord('q')):
+        print("Shutting down...")
         break
 
 cap.release()
