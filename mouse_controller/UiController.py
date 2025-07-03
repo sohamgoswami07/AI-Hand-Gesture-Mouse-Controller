@@ -4,7 +4,7 @@ from config import config
 def start_ui():
     root = tk.Tk()
     root.title("Virtual Mouse Settings")
-    root.geometry("480x480")
+    root.geometry("450x500")
 
     feedback_var = tk.BooleanVar(value=config.visual_feedback_enabled)
 
