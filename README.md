@@ -135,5 +135,5 @@ Inspired by natural human-computer interaction through computer vision.
 ## ✅ Contribution & Feedback
 
 Want to contribute or suggest a feature?
-Reach out on [LinkedIn](https://www.linkedin.com/in/soham-python-developer/), or raise an issue in the repo.
+Reach out on [LinkedIn](https://www.linkedin.com/in/soham-python-developer/), or raise an issue in the repo. 
 
