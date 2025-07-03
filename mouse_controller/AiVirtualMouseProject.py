@@ -17,8 +17,16 @@ threading.Thread(target=start_ui, daemon=True).start()
 cap = cv2.VideoCapture(0)
 cap.set(3, 320)
 cap.set(4, 240)
+
 wCam, hCam = int(cap.get(3)), int(cap.get(4))
 screenW, screenH = pyautogui.size()
+
+# === Action Area Definition ===
+action_margin_x = int(wCam * 0.1)  # 10% margin on x-axis
+action_margin_y = int(hCam * 0.1)  # 10% margin on y-axis
+
+action_x1, action_y1 = action_margin_x, action_margin_y
+action_x2, action_y2 = wCam - action_margin_x, hCam - action_margin_y
 
 # === State Variables ===
 plocX, plocY = 0, 0
@@ -83,12 +91,18 @@ while True:
     current_time = time.time()
 
     if lmList:
+        cv2.rectangle(img, (action_x1, action_y1), (action_x2, action_y2), (0, 255, 0), 2)
         fingers = detector.fingersUp()
         x_index, y_index = lmList[8][1], lmList[8][2]
         x_thumb, y_thumb = lmList[4][1], lmList[4][2]
         x_middle, y_middle = lmList[12][1], lmList[12][2]
 
         index_up = fingers[1] == 1
+        active_finger_ids = [detector.tipIds[i] for i, up in enumerate(fingers) if up == 1]
+        for fid in active_finger_ids:
+            cx, cy = lmList[fid][1], lmList[fid][2]
+            cv2.circle(img, (cx, cy), 10, (255, 255, 255), 2)
+
         thumb_up = fingers[0] == 1
         middle_up = fingers[2] == 1
 
@@ -134,6 +148,9 @@ while True:
                     dx = x_index - scroll_anchor_x
                     scroll_speed_y = int(dy * SCROLL_SENSITIVITY)
                     scroll_speed_x = int(dx * SCROLL_SENSITIVITY)
+                    cv2.circle(img, (x_index, y_index), 10, (255, 255, 255), -1)
+                    cv2.circle(img, (x_middle, y_middle), 10, (255, 255, 255), -1)
+
 
                     if current_time - last_scroll_time > SCROLL_UPDATE_INTERVAL:
                         if abs(scroll_speed_y) > SCROLL_DEADZONE:
@@ -152,8 +169,10 @@ while True:
 
         # === Cursor Movement
         if config.cursor_enabled and ((fingers.count(1) == 1 and index_up) or dragging) and not fingers_touching:
-            x3 = np.interp(x_index, (0, wCam), (0, screenW))
-            y3 = np.interp(y_index, (0, hCam), (0, screenH))
+            x_index = np.clip(x_index, action_x1, action_x2)
+            y_index = np.clip(y_index, action_y1, action_y2)
+            x3 = np.interp(x_index, (action_x1, action_x2), (0, screenW))
+            y3 = np.interp(y_index, (action_y1, action_y2), (0, screenH))
             clocX = plocX + (x3 - plocX) / SMOOTHENING
             clocY = plocY + (y3 - plocY) / SMOOTHENING
             mc.move_cursor(screenW, screenH, clocX, clocY)
@@ -162,14 +181,17 @@ while True:
         # === Pinch Detection
         if index_up and thumb_up and not middle_up:
             if index_thumb_dist < click_threshold:
-                if not pinch_active:
-                    pinch_active = True
-                    pinch_start_time = current_time
-                    if current_time - last_pinch_time < DOUBLE_CLICK_GAP:
-                        pinch_count += 1
-                    else:
-                        pinch_count = 1
-                    last_pinch_time = current_time
+                    cv2.circle(img, (x_index, y_index), 10, (255, 255, 255), -1)
+                    cv2.circle(img, (x_thumb, y_thumb), 10, (255, 255, 255), -1)
+
+                    if not pinch_active:
+                        pinch_active = True
+                        pinch_start_time = current_time
+                        if current_time - last_pinch_time < DOUBLE_CLICK_GAP:
+                            pinch_count += 1
+                        else:
+                            pinch_count = 1
+                        last_pinch_time = current_time
             else:
                 if pinch_active:
                     pinch_active = False
