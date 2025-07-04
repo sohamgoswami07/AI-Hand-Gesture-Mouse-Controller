@@ -70,8 +70,19 @@ def handle_cursor_move(state, fingers, index_up, lmList, config, screenW, screen
         y_index = np.clip(y_index, action_y1, action_y2)
         x3 = np.interp(x_index, (action_x1, action_x2), (0, screenW))
         y3 = np.interp(y_index, (action_y1, action_y2), (0, screenH))
-        state.clocX = state.plocX + (x3 - state.plocX) / config.smoothening
-        state.clocY = state.plocY + (y3 - state.plocY) / config.smoothening
+
+        alpha = 0.6  # adjust 0.5–0.7 for your ideal feel
+        dx = x3 - state.plocX
+        dy = y3 - state.plocY
+
+        # Optional: clamp big jumps
+        max_jump = 100
+        dx = max(-max_jump, min(max_jump, dx))
+        dy = max(-max_jump, min(max_jump, dy))
+
+        state.clocX = state.plocX + dx * alpha
+        state.clocY = state.plocY + dy * alpha
+
         move_cursor(screenW, screenH, state.clocX, state.clocY)
         state.plocX, state.plocY = state.clocX, state.clocY
 

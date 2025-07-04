@@ -1,38 +1,32 @@
-import tkinter as tk
+import ttkbootstrap as tb
+from ttkbootstrap.constants import *
 from config import config
 
 def start_ui():
-    root = tk.Tk()
+    root = tb.Window(themename="flatly")  # Available Themes: cosmo, flatly, minty, cyborg, journal
     root.title("Virtual Mouse Settings")
-    root.geometry("450x500")
+    root.geometry("450x450")
 
-    feedback_var = tk.BooleanVar(value=config.visual_feedback_enabled)
+    feedback_var = tb.BooleanVar(value=config.visual_feedback_enabled)
 
     def toggle_feedback():
         config.visual_feedback_enabled = feedback_var.get()
 
     def stop_program():
         config.shutdown_requested = True
-        root.quit()       # Exit the Tkinter UI
-        root.destroy()    # Close the window completely
+        root.quit()
+        root.destroy()
 
-    # Visual Feedback Toggle
-    tk.Checkbutton(
-        root, text="Enable Camera Visual Feedback",
-        variable=feedback_var,
-        command=toggle_feedback
-    ).pack(pady=10)
+    # Toggle Button
+    tb.Checkbutton(root, text="Enable Camera Visual Feedback", variable=feedback_var, command=toggle_feedback).pack(pady=10)
 
-    # Stop Program Button
-    tk.Button(
-        root, text="Stop Program", fg="white", bg="red",
-        command=stop_program
-    ).pack(pady=20)
+    # Stop Button
+    tb.Button(root, text="Stop Program", bootstyle="danger", command=stop_program).pack(pady=20)
 
     def slider(label, attr, frm, to, res):
-        tk.Label(root, text=label).pack()
-        tk.Scale(root, from_=frm, to=to, resolution=res, orient=tk.HORIZONTAL,
-                 command=lambda val: setattr(config, attr, float(val))).pack()
+        tb.Label(root, text=label).pack()
+        tb.Scale(root, from_=frm, to=to, orient='horizontal', length=300,
+                 command=lambda val: setattr(config, attr, float(val))).pack(pady=5)
 
     slider("Smoothening", "smoothening", 1, 20, 1)
     slider("Click Threshold Ratio", "click_threshold_ratio", 0.05, 0.3, 0.01)
