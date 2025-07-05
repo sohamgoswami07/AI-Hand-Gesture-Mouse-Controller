@@ -7,7 +7,7 @@ from core.constants import *
 from input.MouseController import move_cursor, click_mouse, double_click, right_click, mouse_press, mouse_release
 
 
-def handle_zoom(fingers, lmList, state, config, current_time):
+def handle_zoom(fingers, lmList, state, config, current_time, handedness="Right"):
     if fingers == [1, 1, 1, 0, 0]:
         x_thumb, y_thumb = lmList[4][1:3]
         x_index, y_index = lmList[8][1:3]
@@ -71,11 +71,10 @@ def handle_cursor_move(state, fingers, index_up, lmList, config, screenW, screen
         x3 = np.interp(x_index, (action_x1, action_x2), (0, screenW))
         y3 = np.interp(y_index, (action_y1, action_y2), (0, screenH))
 
-        alpha = 0.6  # adjust 0.5–0.7 for your ideal feel
+        alpha = 0.6
         dx = x3 - state.plocX
         dy = y3 - state.plocY
 
-        # Optional: clamp big jumps
         max_jump = 100
         dx = max(-max_jump, min(max_jump, dx))
         dy = max(-max_jump, min(max_jump, dy))
@@ -87,10 +86,12 @@ def handle_cursor_move(state, fingers, index_up, lmList, config, screenW, screen
         state.plocX, state.plocY = state.clocX, state.clocY
 
 
-def handle_pinch_drag_click(fingers, lmList, state, current_time, click_threshold):
+def handle_pinch_drag_click(fingers, lmList, state, current_time, click_threshold, handedness="Right"):
     index_up = fingers[1]
     thumb_up = fingers[0]
     middle_up = fingers[2]
+
+    # Use consistent landmark indices for tip positions
     x_index, y_index = lmList[8][1:3]
     x_thumb, y_thumb = lmList[4][1:3]
     index_thumb_dist = math.hypot(x_index - x_thumb, y_index - y_thumb)

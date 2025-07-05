@@ -12,10 +12,16 @@ class handDetector:
         self.mpDraw = mp.solutions.drawing_utils
         self.lmList = []
         self.tipIds = [4, 8, 12, 16, 20]
+        self.results = None
 
     def findHands(self, img, draw=False):
         imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         self.results = self.hands.process(imgRGB)
+
+        if self.results.multi_hand_landmarks and draw:
+            for handLms in self.results.multi_hand_landmarks:
+                self.mpDraw.draw_landmarks(img, handLms, mp.solutions.hands.HAND_CONNECTIONS)
+
         return img
 
     def findPosition(self, img, handNo=0, draw=True, showActiveOnly=False, fingersState=None):
@@ -36,13 +42,21 @@ class handDetector:
                             cv2.circle(img, (cx, cy), 12, (255, 255, 255), 2)
         return self.lmList, img
 
-    def fingersUp(self):
+    def getHandedness(self):
+        if self.results.multi_handedness:
+            return self.results.multi_handedness[0].classification[0].label
+        return None
+
+    def fingersUp(self, handedness="Right"):
         fingers = [0, 0, 0, 0, 0]
         if len(self.lmList) == 0:
             return fingers
 
-        # Thumb
-        fingers[0] = int(self.lmList[4][1] > self.lmList[3][1])  # Assume right hand
+        # Fix thumb logic considering image is flipped (cv2.flip(img, 1))
+        if handedness == "Right":
+            fingers[0] = int(self.lmList[4][1] < self.lmList[3][1])  # flipped logic
+        else:  # Left hand
+            fingers[0] = int(self.lmList[4][1] > self.lmList[3][1])  # flipped logic
 
         # Fingers (index to pinky)
         for i in range(1, 5):

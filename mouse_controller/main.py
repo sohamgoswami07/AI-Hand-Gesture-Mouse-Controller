@@ -27,7 +27,7 @@ cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 320)
 wCam, hCam = int(cap.get(3)), int(cap.get(4))
 screenW, screenH = pyautogui.size()
 
-# === Action Area Definition (smaller area for less finger movement) ===
+# === Action Area Definition ===
 action_margin_x = int(wCam * 0.2)
 action_margin_y = int(hCam * 0.2)
 action_x1, action_y1 = action_margin_x, action_margin_y
@@ -35,10 +35,9 @@ action_x2, action_y2 = wCam - action_margin_x, hCam - action_margin_y
 
 # === Hand Detector ===
 detector = handDetector(detectionCon=0.7, trackCon=0.7)
-
 state = GestureState()
-
 window_open = False
+
 while True:
     success, img = cap.read()
     if not success:
@@ -53,10 +52,14 @@ while True:
     img = cv2.flip(img, 1)
     img = detector.findHands(img, draw=False)
     lmList, _ = detector.findPosition(img, draw=False)
+    handedness = detector.getHandedness() or "Right"
     current_time = time.time()
 
+    # Display handedness on screen
+    cv2.putText(img, f"Hand: {handedness}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (100, 255, 100), 2)
+
     if lmList:
-        fingers = detector.fingersUp()
+        fingers = detector.fingersUp(handedness)
 
         index_up = fingers[1] == 1
         thumb_up = fingers[0] == 1
@@ -69,17 +72,15 @@ while True:
         index_thumb_dist = math.hypot(x_index - x_thumb, y_index - y_thumb)
         index_middle_dist = math.hypot(x_index - x_middle, y_index - y_middle)
 
-        finger_count = fingers.count(1)
-
-        # Gesture Handling
-        handle_zoom(fingers, lmList, state, config, current_time)
+        # Gesture Handling (handedness passed into zoom)
+        handle_zoom(fingers, lmList, state, config, current_time, handedness)
         handle_scroll(fingers, lmList, state, config, current_time, click_threshold)
         handle_cursor_move(state, fingers, index_up, lmList, config, screenW, screenH,
                            action_x1, action_x2, action_y1, action_y2)
-        handle_pinch_drag_click(fingers, lmList, state, current_time, click_threshold)
+        handle_pinch_drag_click(fingers, lmList, state, current_time, click_threshold, handedness)
         handle_swipe(fingers, lmList, state, current_time)
 
-        # === Draw fingertip circles (white with fill on action) ===
+        # Draw fingertip feedback
         circle_color = (255, 255, 255)
         circle_thickness = 2
         circle_radius = 10
@@ -96,10 +97,8 @@ while True:
                     else:
                         cv2.circle(img, (x, y), circle_radius, circle_color, circle_thickness)
 
-    # === Draw Green Border for Action Area ===
     cv2.rectangle(img, (action_x1, action_y1), (action_x2, action_y2), (0, 255, 0), 1)
 
-    # === Visual Feedback ===
     if config.visual_feedback_enabled:
         if not window_open:
             window_open = True
