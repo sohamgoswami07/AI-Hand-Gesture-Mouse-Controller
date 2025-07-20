@@ -4,7 +4,6 @@ import time
 import math
 import threading
 import pyautogui
-import keyboard
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
@@ -14,7 +13,8 @@ from vision.HandTrackingModule import handDetector
 from input.MouseController import move_cursor, click_mouse, double_click, right_click, mouse_press, mouse_release
 from core.gesture_state import GestureState
 from core.constants import *
-from core.gestures import handle_zoom, handle_scroll, handle_cursor_move, handle_pinch_drag_click, handle_swipe
+from core.gesture_processor import GestureProcessor
+
 
 # === Launch UI in Background Thread ===
 threading.Thread(target=start_ui, daemon=True).start()
@@ -36,6 +36,12 @@ action_x2, action_y2 = wCam - action_margin_x, hCam - action_margin_y
 # === Hand Detector ===
 detector = handDetector(detectionCon=0.7, trackCon=0.7)
 state = GestureState()
+
+gesture_processor = GestureProcessor(
+    config, state, screenW, screenH,
+    (action_x1, action_x2, action_y1, action_y2)
+)
+
 window_open = False
 
 while True:
@@ -55,9 +61,6 @@ while True:
     handedness = detector.getHandedness() or "Right"
     current_time = time.time()
 
-    # Display handedness on screen
-    cv2.putText(img, f"Hand: {handedness}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (100, 255, 100), 2)
-
     if lmList:
         fingers = detector.fingersUp(handedness)
 
@@ -72,15 +75,11 @@ while True:
         index_thumb_dist = math.hypot(x_index - x_thumb, y_index - y_thumb)
         index_middle_dist = math.hypot(x_index - x_middle, y_index - y_middle)
 
-        # Gesture Handling (handedness passed into zoom)
-        handle_zoom(fingers, lmList, state, config, current_time, handedness)
-        handle_scroll(fingers, lmList, state, config, current_time, click_threshold)
-        handle_cursor_move(state, fingers, index_up, lmList, config, screenW, screenH,
-                           action_x1, action_x2, action_y1, action_y2)
-        handle_pinch_drag_click(fingers, lmList, state, current_time, click_threshold, handedness)
-        handle_swipe(fingers, lmList, state, current_time)
+        # Gesture Handling using GestureProcessor
+        gesture_processor.process(
+            fingers, lmList, handedness, current_time, click_threshold
+        )
 
-        # Draw fingertip feedback
         circle_color = (255, 255, 255)
         circle_thickness = 2
         circle_radius = 10
